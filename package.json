@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "fs-extra": "*",
+    "node-fetch": "*",
+    "jsdom": "*",
+    "rss-parser": "*"
+  },
+  "config": {
+    "subreddits": {
+      "birding/new": 0,
+      "redpandas/new": 0,
+      "naturporn/new": 0
+    },
+    "downloadPath": "./downloads",
+    "exclude": [
+      ".gif",
+      ".gifv"
+    ]
+  }
+}
