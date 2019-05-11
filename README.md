@@ -6,6 +6,12 @@ image subreddits since the last time you checked.
 
 ## install the dependencies
 
+You need to have Node.js installed, so if you don't, you probably
+want to install that first. Or find a python script somewhere on
+github that does the same thing, but the whole reason I wrote this
+one is that all the python scripts are ancient and none of them
+work either with current Reddit, or Python 3. So... yeah.
+
 `> npm install` or `> yarn install` should both work. The script
 needs about 17MB worth of dependencies, which sounds insane until
 you remember that Node has no RSS or HTML parsing built in, and
