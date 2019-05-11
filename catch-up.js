@@ -88,15 +88,21 @@ async function catchUp(subreddit, since, lastId) {
     let downloads = 0;
 
     feed.items.forEach(item => {
+        // skip if too old
+        let date = new Date(item.isoDate);
+        let time = date.getTime();
+        if (time < since) return;
+
+        // check the content for image links
         let content = new JSDOM(item.content);
         let links = Array.from(content.window.document.querySelectorAll('a'));
         let imgLinks = links.filter(a => imageDomain(a.href));
-        if (imgLinks.length > 1) {
-            console.log("more than one image?", content.serialize());
-        }
+        if (imgLinks.length > 1) console.log("more than one image?", content.serialize());
         let img = imgLinks[0];
         // comment-only posts do exist, so we skip over them.
         if (!img) return;
+
+        // if we get here we should be able to download "the" image for this post
         let href = img.href;
         if (downloadImage(href, subreddit.filepath)) downloads++;
     });
