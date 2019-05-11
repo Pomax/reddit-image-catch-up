@@ -1,4 +1,11 @@
-// https://www.reddit.com/dev/api#GET_new
+/**
+ *
+ * Run this with "node catch-up" and that's basically all you need to know.
+ *
+ * See the README.md on how to actually configure the script, or just look
+ * in package.json and change it in a way that you can assume will work.
+ *
+  */
 
 const http = require('http');
 const https = require('https');
