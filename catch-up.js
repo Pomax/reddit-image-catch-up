@@ -16,6 +16,8 @@ else if (fs.existsSync('./config.json')) configPath = path.join(__dirname, 'conf
 else configPath = path.join(__dirname, 'package.json');
 console.log(`Loading config from ${configPath}`);
 const config = require(configPath).config;
+config.downloadPath = config.downloadPath || "downloads";
+config.exclude = config.exclude || [];
 
 // ensure the download directories exist:
 fs.mkdirpSync(path.join(__dirname, config.downloadPath));

@@ -11,7 +11,7 @@
       "redpandas/new": 0,
       "naturporn/new": 0
     },
-    "downloadPath": "./downloads",
+    "downloadPath": "downloads",
     "exclude": [
       ".gif",
       ".gifv"
