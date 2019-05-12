@@ -175,7 +175,7 @@ async function catchUp(whenDone, subreddit, since, lastId) {
 }
 
 /**
- * The updated to the "since" value for each subreddit means that  whenever
+ * The updated to the "since" value for each subreddit means that whenever
  * a subreddit is done, we should write the updated config back to file.
  */
 function writeConfig() {
