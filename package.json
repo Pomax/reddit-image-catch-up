@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "fs-extra": "*",
-    "node-fetch": "*",
-    "jsdom": "*",
-    "rss-parser": "*"
+    "fs-extra": "^8.0.0",
+    "jsdom": "^15.0.0",
+    "node-fetch": "^2.5.0",
+    "rss-parser": "^3.7.0"
   },
   "config": {
     "subreddits": {
@@ -11,7 +11,12 @@
       "redpandas/new": 0,
       "naturporn/new": 0
     },
+    "domains": [
+      "imgur.com",
+      "i.redd.it"
+    ],
     "downloadPath": "downloads",
+    "consolidate": false,
     "exclude": [
       ".gif",
       ".gifv"

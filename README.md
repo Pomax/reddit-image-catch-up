@@ -20,21 +20,21 @@ basically a trivial amount of space in this day and age.
 
 ## Running the script
 
-There's not much to say, run it with `> node catch-up` and you're
+There's not much to say; run it with `> node catch-up` and you're
 pretty much done. Except for the step where you'll want to make
-sure that the config is for the subreddits you want to actually
-catch up on, of course...
+sure that the configuration specifies the subreddits you want to
+actually catch up on, of course... So read on.
 
-## set up your config
+## Setting up your configuration
 
 In order for the catch-up script to work, it needs a config
 object to work with, which can be in one of three places:
 
-1. package.json
-2. config.json
-3. config.json but renamed to whatever you want
+1. `package.json`
+2. `config.json`
+3. a file like `config.json` but not called that.
 
-### Using package.json for your config
+### Using package.json for your configuration
 
 If you don't change anything, then the script will use the
 predefined config that is already presupplied in this project's
@@ -54,7 +54,12 @@ package.json:
       "redpandas/new": 0,
       "naturporn/new": 0
     },
+    "domains": [
+      "imgur.com",
+      "i.redd.it"
+    ],
     "downloadPath": "downloads",
+    "consolidate": false,
     "exclude": [
       ".gif",
       ".gifv"
@@ -71,25 +76,40 @@ pretty landscape photography.
 
 The obvious meat and potatoes is the `subreddits` list.
 Each subreddit has a name with optional subset (though
-I can't think of a reason why you'd pick "top" rather
-than "new" if you want to catch up on what got posted...),
-and the numbers after each subreddit indicates the last
-time the catch-up script ran for that particular subreddit.
+I can't think of a reason why you'd pick `/top` or `/hot`
+rather than `/new`, if you're running a catching-up
+script...), and the numbers after each subreddit indicates
+the last time the catch-up script ran for that particular
+subreddit.
 
 (If you ever want to redownload as far back as reddit will
-let you, just set those to 0 before running the script)
+let you, just set those to `0` before running the script)
+
+The `domains` value is an array of domains that we "know"
+are image hosts. If left off, this assumes the same
+list as shown above, but maybe your particular subreddits
+has a different convention around where images get posted,
+in which case you'll want to add that to the domains list.
 
 The `downloadPath` is where the catch-up script will be
 writing images to. Note that it will create subdirectories
 for each subreddit you have in your list. This value is
 optional, it simply assumed "downloads" if you leave it out.
 
-Finally, there is an `exclude` array for specifying a list
-of "image" file extensions you don't want thingds downloaded
-for. This value is optional, and assumes an empty list if you
-leave it out.
+The `consolidate` flag is used to tell the script whether or
+not to build subdirectories. When omitted it is assuemd `false`
+but when set to `true` all images will be downloaded into the
+`downloadPath` directory, rather than into each subreddit's
+own subdirectories. This can be useful when one of your
+configs is for, say, general nature photography, and you
+just want to dump everything into a "playlist" on a digital
+picture frame.
 
-### Using config.json for your config
+Finally, there is an `exclude` array for specifying a list
+of file extensions that you don't want downloaded. This value
+is optional, and assumes an empty list if you leave it out.
+
+### Using config.json for your configuration
 
 You can, alternatively, create your own default config
 by making a file called `config.json` and then putting
@@ -104,6 +124,7 @@ the configuration JSON in that:
       "naturporn/new": 0
     },
     "downloadPath": "./downloads",
+    "consolidate": false,
     "exclude": [
       ".gif",
       ".gifv"
@@ -111,6 +132,9 @@ the configuration JSON in that:
   }
 }
 ```
+
+Running `> node catch-up` will pick this file over
+the package.json configuration if it exists.
 
 ### Using a custom named config.json
 
@@ -121,3 +145,8 @@ to run using that custom config, using a `-c` flag:
 ```
 > node catch-up -c yourfilenamehere
 ```
+
+This can be useful if you want multiple thematic
+catch-up operations. For instance, one `nature.json`
+for all your natury photographs, and `aww.json`
+for all those puppy and kitten photos.
