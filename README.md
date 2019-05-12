@@ -4,7 +4,13 @@ This is a simple [node.js](https://nodejs.org) script that will
 automatically download all new images posted to your favourite
 image subreddits since the last time you checked.
 
-## install the dependencies
+It can be run manually, or (which makes more sense) in a crob job
+that runs every hour or something to set up a persistent catch-up
+with some other utility looking at the download directory for
+"doing things with those images" (like moving them to the dir that
+your digital picture frame loads images from).
+
+## Install the dependencies
 
 You need to have Node.js installed, so if you don't, you probably
 want to install that first. Or find a python script somewhere on
