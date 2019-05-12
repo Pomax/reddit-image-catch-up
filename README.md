@@ -40,7 +40,7 @@ object to work with, which can be in one of three places:
 2. `config.json`
 3. a file like `config.json` but not called that.
 
-### Using package.json for your configuration
+### 1. Using package.json for your configuration
 
 If you don't change anything, then the script will use the
 predefined config that is already presupplied in this project's
@@ -115,7 +115,7 @@ Finally, there is an `exclude` array for specifying a list
 of file extensions that you don't want downloaded. This value
 is optional, and assumes an empty list if you leave it out.
 
-### Using config.json for your configuration
+### 2. Using config.json for your configuration
 
 You can, alternatively, create your own default config
 by making a file called `config.json` and then putting
@@ -146,7 +146,7 @@ the configuration JSON in that:
 Running `node catch-up` will always pick this file over
 the package.json configuration, when it exists.
 
-### Using a custom named config.json
+### 3. Using a custom named config.json
 
 Same as above, except you can give it any name you
 want, really. You'll just need to tell the script
