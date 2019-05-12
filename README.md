@@ -143,8 +143,8 @@ the configuration JSON in that:
 }
 ```
 
-Running `> node catch-up` will pick this file over
-the package.json configuration if it exists.
+Running `node catch-up` will always pick this file over
+the package.json configuration, when it exists.
 
 ### Using a custom named config.json
 
