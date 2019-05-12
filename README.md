@@ -26,7 +26,7 @@ basically a trivial amount of space in this day and age.
 
 ## Running the script
 
-There's not much to say; run it with `node catch-up` and you're
+There's not much to say; run it with `node catch-up.js` and you're
 pretty much done. Except for the step where you'll want to make
 sure that the configuration specifies the subreddits you want to
 actually catch up on, of course... So read on.
@@ -143,7 +143,7 @@ the configuration JSON in that:
 }
 ```
 
-Running `node catch-up` will always pick this file over
+Running `node catch-up.js` will always pick this file over
 the package.json configuration, when it exists.
 
 ### 3. Using a custom named config.json
@@ -153,7 +153,7 @@ want, really. You'll just need to tell the script
 to run using that custom config, using a `-c` flag:
 
 ```
-node catch-up -c yourfilenamehere
+node catch-up.js -c yourfilenamehere
 ```
 
 This can be useful if you want multiple thematic
