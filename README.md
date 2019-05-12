@@ -18,7 +18,7 @@ github that does the same thing, but the whole reason I wrote this
 one is that all the python scripts are ancient and none of them
 work either with current Reddit, or Python 3. So... yeah.
 
-`> npm install` or `> yarn install` should both work. The script
+`npm install` or `yarn install` should both work. The script
 needs about 17MB worth of dependencies, which sounds insane until
 you remember that Node has no RSS or HTML parsing built in, and
 it turns out that good parsers are not tiny. Then again, 17MB is
@@ -26,7 +26,7 @@ basically a trivial amount of space in this day and age.
 
 ## Running the script
 
-There's not much to say; run it with `> node catch-up` and you're
+There's not much to say; run it with `node catch-up` and you're
 pretty much done. Except for the step where you'll want to make
 sure that the configuration specifies the subreddits you want to
 actually catch up on, of course... So read on.
@@ -149,7 +149,7 @@ want, really. You'll just need to tell the script
 to run using that custom config, using a `-c` flag:
 
 ```
-> node catch-up -c yourfilenamehere
+node catch-up -c yourfilenamehere
 ```
 
 This can be useful if you want multiple thematic
