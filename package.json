@@ -1,4 +1,5 @@
 {
+  "version": "0.1.0",
   "dependencies": {
     "fs-extra": "^8.0.0",
     "jsdom": "^15.0.0",
