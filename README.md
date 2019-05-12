@@ -129,6 +129,10 @@ the configuration JSON in that:
       "redpandas/new": 0,
       "naturporn/new": 0
     },
+    "domains": [
+      "imgur.com",
+      "i.redd.it"
+    ],
     "downloadPath": "./downloads",
     "consolidate": false,
     "exclude": [
