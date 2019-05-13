@@ -18,6 +18,7 @@ github that does the same thing, but the whole reason I wrote this
 one is that all the python scripts are ancient and none of them
 work either with current Reddit, or Python 3. So... yeah.
 
+As far as installing the script dependencies is concerned,
 `npm install` or `yarn install` should both work. The script
 needs about 17MB worth of dependencies, which sounds insane until
 you remember that Node has no RSS or HTML parsing built in, and
@@ -29,7 +30,7 @@ basically a trivial amount of space in this day and age.
 There's not much to say; run it with `node catch-up.js` and you're
 pretty much done. Except for the step where you'll want to make
 sure that the configuration specifies the subreddits you want to
-actually catch up on, of course... So read on.
+actually catch up on, of course... So: read on.
 
 ## Setting up your configuration
 
@@ -38,13 +39,12 @@ object to work with, which can be in one of three places:
 
 1. `package.json`
 2. `config.json`
-3. a file like `config.json` but not called that.
+3. a file like `config.json`, but not called that.
 
 ### 1. Using package.json for your configuration
 
 If you don't change anything, then the script will use the
-predefined config that is already presupplied in this project's
-package.json:
+predefined config in this project's package.json:
 
 ```
 {
@@ -84,7 +84,7 @@ The obvious meat and potatoes is the `subreddits` list.
 Each subreddit has a name with optional subset (though
 I can't think of a reason why you'd pick `/top` or `/hot`
 rather than `/new`, if you're running a catching-up
-script...), and the numbers after each subreddit indicates
+script...), and the numbers after each subreddit indicate
 the last time the catch-up script ran for that particular
 subreddit.
 
@@ -92,34 +92,35 @@ subreddit.
 let you, just set those to `0` before running the script)
 
 The `domains` value is an array of domains that we "know"
-are image hosts. If left off, this assumes the same
+are image hosts. If left off, the script assumes the same
 list as shown above, but maybe your particular subreddits
-has a different convention around where images get posted,
-in which case you'll want to add that to the domains list.
+have a different convention around where images get posted,
+in which case you'll want to ammend the domains list.
 
 The `downloadPath` is where the catch-up script will be
-writing images to. Note that it will create subdirectories
-for each subreddit you have in your list. This value is
-optional, it simply assumed "downloads" if you leave it out.
+writing images to. Note that subdirectories will be created
+inside this directory for each subreddit you have in your
+list. This value is optional, and defaults to "downloads"
+if you leave it out.
 
 The `consolidate` flag is used to tell the script whether or
-not to build subdirectories. When omitted it is assuemd `false`
-but when set to `true` all images will be downloaded into the
-`downloadPath` directory, rather than into each subreddit's
-own subdirectories. This can be useful when one of your
-configs is for, say, general nature photography, and you
-just want to dump everything into a "playlist" on a digital
+not to build subdirectories. When omitted, it is assumed
+`false`, but when set to `true` all images will be downloaded
+into the base `downloadPath` directory, rather than into each
+subreddit's own subdirectory. This can be useful when one of
+your configs is for, say, general nature photography, and you
+just want to dump everything into a "playlist" for a digital
 picture frame.
 
 Finally, there is an `exclude` array for specifying a list
 of file extensions that you don't want downloaded. This value
-is optional, and assumes an empty list if you leave it out.
+is optional, and defaults to an empty list if you leave it out.
 
 ### 2. Using config.json for your configuration
 
-You can, alternatively, create your own default config
-by making a file called `config.json` and then putting
-the configuration JSON in that:
+You can also create your own default configuration by creating
+a file called `config.json` and then putting the configuration
+JSON in that:
 
 ```
 {
@@ -144,7 +145,7 @@ the configuration JSON in that:
 ```
 
 Running `node catch-up.js` will always pick this file over
-the package.json configuration, when it exists.
+the package.json configuration, if it exists.
 
 ### 3. Using a custom named config.json
 
@@ -159,4 +160,4 @@ node catch-up.js -c yourfilenamehere
 This can be useful if you want multiple thematic
 catch-up operations. For instance, one `nature.json`
 for all your natury photographs, and `aww.json`
-for all those puppy and kitten photos.
+for all those puppy, kitten, and bunny photos.
