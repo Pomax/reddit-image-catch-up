@@ -74,8 +74,8 @@ predefined config in this project's package.json:
 }
 ```
 
-It's set up to catch you up on bird pictures, pictures
-of red pandas, and "nature porn" which is really just
+It's set up to catch you up on [bird pictures](https://reddit.com/r/birds), pictures
+of [red pandas](https://reddit.com/r/redpandas), and ["nature porn"](https://reddit.com/r/natureporn), which is really just
 pretty landscape photography.
 
 #### Explaining the configuration options
