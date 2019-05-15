@@ -15,7 +15,9 @@ const fs = require('fs-extra');
  */
 function getImageFields(config, subreddits) {
     let uuid = 1;
+
     const fid = () => uuid++;
+
     const generate = dir => {
         let files = fs.readdirSync(dir);
         return files.map(filename => {
