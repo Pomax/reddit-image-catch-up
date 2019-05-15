@@ -3,7 +3,6 @@
   "dependencies": {
     "fs-extra": "^8.0.0",
     "jsdom": "^15.0.0",
-    "node-fetch": "^2.5.0",
     "rss-parser": "^3.7.0"
   },
   "config": {
