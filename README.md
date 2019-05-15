@@ -28,9 +28,14 @@ basically a trivial amount of space in this day and age.
 ## Running the script
 
 There's not much to say; run it with `node catch-up.js` and you're
-pretty much done. Except for the step where you'll want to make
-sure that the configuration specifies the subreddits you want to
-actually catch up on, of course... So: read on.
+pretty much done. The following flags are supported:
+
+- `-c filename` explicitly load the configuration from a file.
+- `-s` run a review server on http://localhost:8080 after catching up.
+
+And of course that doesn't explain how to set up the configuration,
+which you'll want to know about in order to indicate which subreddits
+you want to catch up on, of course, so... Read on!
 
 ## Setting up your configuration
 
