@@ -2,7 +2,8 @@
 
 This is a simple [node.js](https://nodejs.org) script that will
 automatically download all new images posted to your favourite
-image subreddits since the last time you checked.
+public image subreddits (based on the subreddit RSS feed) since
+the last time you checked.
 
 It can be run manually, or (which makes more sense) in a crob job
 that runs every hour or something to set up a persistent catch-up
