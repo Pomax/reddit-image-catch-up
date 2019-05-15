@@ -124,7 +124,17 @@ async function catchUp(whenDone, subreddit, since, lastId) {
     // Get the RSS feed:
     let url = `https://www.reddit.com/r/${subreddit.base}.rss?limit=50`;
     if (lastId) url = `${url}&after=${lastId}`;
-    let feed = await parser.parseURL(url);
+
+    let feed;
+    try {
+        feed = await parser.parseURL(url);
+    } catch (e) {
+        let str = e.toString();
+        if (str.indexOf('403') !== -1) {
+            return whenDone(`It looks like "${subreddit.r}" is a private subreddit, and so cannot be caught up on via RSS`);
+        }
+        return whenDone(str);
+    }
 
     // If there's nothing to download, exit.
     if (feed.items.length === 0) {
