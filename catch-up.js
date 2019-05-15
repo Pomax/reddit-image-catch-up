@@ -217,4 +217,18 @@ function writeConfig() {
         })
     );
     console.log("\nYou're all caught up!");
+
+    // If the script was invoked with -s then the user can
+    // make a preselection of images worth keeping using a
+    // very simple server running on http://localhost:8080
+    if(process.argv.indexOf('-s') !== -1) {
+        const runServer = require('./server.js');
+        await runServer(config, subreddits);
+    }
+
+    // Stay-alive network connections can potentially
+    // keep the script alive. We don't want that. So
+    // rather than have Node "discover" it can exit,
+    // force the process to exit.
+    process.exit(0);
 })();
