@@ -93,7 +93,9 @@ function downloadImage(url, dir) {
     let protocol = https;
     if (url.indexOf("https://") === -1) protocol = http;
     const imageFile = fs.createWriteStream(filepath);
-    protocol.get(url, response => response.pipe(imageFile));
+    protocol.get(url, response => {
+        response.pipe(imageFile);
+    });
 
     // Note that we do not verify that the file-write succeeded.
     // As such, it is entirely possible that some images get
@@ -226,9 +228,8 @@ function writeConfig() {
         await runServer(config, subreddits);
     }
 
-    // Stay-alive network connections can potentially
-    // keep the script alive. We don't want that. So
-    // rather than have Node "discover" it can exit,
-    // force the process to exit.
-    process.exit(0);
+    // This may not exit immediately, because of
+    // network stay-alive messages and/or file
+    // writes for images not having quite finished
+    // by the time we get here.
 })();
