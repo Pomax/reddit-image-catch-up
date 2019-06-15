@@ -1,0 +1,59 @@
+:root {
+  --green: #8ee984;
+}
+
+fieldset {
+  border: none;
+  display: inline-block;
+}
+
+label {
+  display: inline-block;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+img {
+  border: 3px solid transparent;
+  width: auto;
+  height: 300px;
+}
+
+img.zoomed {
+  width: auto;
+  height: auto;
+  max-height: calc(100vh - 20px);
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 10px);
+}
+
+input[type="checkbox"]:checked + img {
+  border-color: red;
+}
+
+button {
+  display: block;
+  width: 80%;
+  margin: auto;
+  height: 2em;
+  border-radius: 10px;
+  font-family: Arial;
+  font-size: 4em;
+  background: var(--green);
+}
+
+#all,
+#none {
+  display: inline-block;
+  border: 1px solid black;
+  background: var(--green);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: Arial;
+  font-weight: bold;
+}

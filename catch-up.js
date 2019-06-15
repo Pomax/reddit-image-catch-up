@@ -53,7 +53,7 @@ Object.keys(config.subreddits).forEach(subreddit => {
     // ensure that each subreddit has a corresponding subdirectory
     // inside the download directory.
     if (!config.consolidate) {
-        let dir = path.join(__dirname, config.downloadPath, e.r);
+        let dir = path.join(config.downloadPath, e.r);
         if (e.s) dir = path.join(dir, e.s);
         e.filepath = dir;
         fs.mkdirpSync(e.filepath);
@@ -215,20 +215,24 @@ function writeConfig() {
  * Note that this function is invoked immediately upon declaration.
  */
 (async function startCatchingUp() {
-    await Promise.all(
-        subreddits.map(subreddit => {
-            return new Promise(resolve => {
-                let whenDone = (msg) => {
-                    console.log(msg);
-                    config.subreddits[subreddit.base] = Date.now();
-                    writeConfig();
-                    resolve();
-                };
-                catchUp(whenDone, subreddit, subreddit.since);
-            });
-        })
-    );
-    console.log("\nYou're all caught up!");
+    if (process.argv.indexOf('--bypass')===-1) {
+        await Promise.all(
+            subreddits.map(subreddit => {
+                return new Promise(resolve => {
+                    let whenDone = (msg) => {
+                        console.log(msg);
+                        config.subreddits[subreddit.base] = Date.now();
+                        writeConfig();
+                        resolve();
+                    };
+                    catchUp(whenDone, subreddit, subreddit.since);
+                });
+            })
+        );
+
+        console.log("\nYou're all caught up!");
+        console.log("(Note: it may take a few seconds for all your file-writes to finish)\n");
+    }
 
     // If the script was invoked with -s then the user can
     // make a preselection of images worth keeping using a

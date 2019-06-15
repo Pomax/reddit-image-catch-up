@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Reddit image catch-up</title>
+		<link rel="stylesheet" href="index.css">
+		<script src="index.js" async defer></script>
+	</head>
+	<body>
+		<h1>Reddit image catch-up curation</h1>
+		<p>Unselect any image you want to keep, and then hit the "Done" button</p>
+		<p><span id="none">Unmark all images (keep all)</span> <span id="all">Mark all images (delete all)</span></p>
+		<form action="." method="POST">
+			{{ images }}
+			<button id='done'>Done</button>
+		</form>
+	</body>
+</html>

@@ -33,6 +33,11 @@ pretty much done. The following flags are supported:
 
 - `-c filename` explicitly load the configuration from a file.
 - `-s` run a review server on http://localhost:8080 after catching up.
+- `--bypass` skip the actual "catch up" part of the script.   
+
+Note that this last option is really only useful in combination with
+the `-s` flag, to skip the downloading and simply fire up the curation
+server to do some weeding of images downloaded previously.
 
 And of course that doesn't explain how to set up the configuration,
 which you'll want to know about in order to indicate which subreddits

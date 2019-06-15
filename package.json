@@ -3,13 +3,14 @@
   "dependencies": {
     "fs-extra": "^8.0.0",
     "jsdom": "^15.0.0",
+    "open": "^6.3.0",
     "rss-parser": "^3.7.0"
   },
   "config": {
     "subreddits": {
-      "birding/new": 0,
-      "redpandas/new": 0,
-      "naturporn/new": 0
+      "birding/new": 1557938390467,
+      "redpandas/new": 1557938390806,
+      "natureporn/new": 1557938308147
     },
     "domains": [
       "imgur.com",
