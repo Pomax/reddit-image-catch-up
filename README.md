@@ -69,7 +69,7 @@ predefined config in this project's package.json:
     "subreddits": {
       "birding/new": 0,
       "redpandas/new": 0,
-      "naturporn/new": 0
+      "natureporn/new": 0
     },
     "domains": [
       "imgur.com",
@@ -139,7 +139,7 @@ JSON in that:
     "subreddits": {
       "birding/new": 0,
       "redpandas/new": 0,
-      "naturporn/new": 0
+      "natureporn/new": 0
     },
     "domains": [
       "imgur.com",
