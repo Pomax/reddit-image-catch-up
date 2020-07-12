@@ -19,7 +19,7 @@ function getImageFields(config, subreddits) {
   const generate = (dir, subreddit) => {
     let files = fs.readdirSync(dir);
 
-    let fieldsets = files.map(filename => {
+    let fieldsets = files.map((filename) => {
       return `
 			<fieldset>
 				<label>
@@ -33,9 +33,7 @@ function getImageFields(config, subreddits) {
     return `
 			${
         subreddit
-          ? `<h2><a href="https://reddit.com/r/${subreddit.r}">r/${
-              subreddit.r
-            }</a></h2>`
+          ? `<h2><a href="https://reddit.com/r/${subreddit.r}">r/${subreddit.r}</a></h2>`
           : ``
       }
 			${fieldsets.join("\n")}
@@ -43,7 +41,9 @@ function getImageFields(config, subreddits) {
   };
 
   if (!config.consolidate) {
-    return subreddits.map(subreddit => generate(subreddit.filepath, subreddit));
+    return subreddits.map((subreddit) =>
+      generate(subreddit.filepath, subreddit)
+    );
   }
 
   return generate(config.downloadPath);
@@ -54,16 +54,21 @@ function getImageFields(config, subreddits) {
  */
 function handlePOSTdata(req, whenDone) {
   let body = "";
-  req.on("data", chunk => {
+  req.on("data", (chunk) => {
     body += chunk.toString();
   });
   req.on("end", async () => {
     let query = decodeURIComponent(body);
     let files = query
       .split("&")
-      .map(v => v.split("=")[1])
-      .filter(v => v);
-    files.forEach(filename => fs.unlinkSync(filename));
+      .map((v) => v.split("=")[1])
+      .filter((v) => v);
+    files.forEach((filename) => {
+      // something might have deleted a file while the server was running.
+      try {
+        fs.unlinkSync(filename);
+      } catch (e) {}
+    });
     whenDone();
   });
 }
@@ -72,30 +77,33 @@ function handlePOSTdata(req, whenDone) {
  * A few simple static URL servicing functions.
  */
 function getGenerator(url, imageHTML) {
-  const pubdir = path.join(__dirname, 'public');
+  const pubdir = path.join(__dirname, "public");
   const generate = {
-    '/': res => {
-      let file = path.join(pubdir, 'index.html');
+    "/": (res, configName, config) => {
+      let file = path.join(pubdir, "index.html");
       fs.readFile(file, (err, data) => {
         res.setHeader("Content-Type", "text/html");
-        data = data.toString('utf-8').replace(`{{ images }}`, imageHTML);
+        data = data
+          .toString("utf-8")
+          .replace(`{{ images }}`, imageHTML)
+          .replace(`{{ configName }}`, configName);
         res.end(data);
       });
     },
-    '/index.js': res => {
-      let file = path.join(pubdir, 'index.js');
+    "/index.js": (res, configName, config) => {
+      let file = path.join(pubdir, "index.js");
       fs.readFile(file, (err, data) => {
         res.setHeader("Content-Type", "application/javascript");
         res.end(data);
       });
     },
-    '/index.css': res => {
-      let file = path.join(pubdir, 'index.css');
+    "/index.css": (res, configName, config) => {
+      let file = path.join(pubdir, "index.css");
       fs.readFile(file, (err, data) => {
         res.setHeader("Content-Type", "text/css");
         res.end(data);
       });
-    }
+    },
   };
 
   return generate[url];
@@ -105,16 +113,16 @@ function getGenerator(url, imageHTML) {
  * Run a super simple server that shows all downloaded
  * images and lets you pick which ones to keep.
  */
-async function runServer(config, subreddits, whenDone) {
+async function runServer(configName, config, subreddits, whenDone) {
   const imageHTML = getImageFields(config, subreddits);
 
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const server = http
       .createServer((req, res) => {
         if (req.method === "GET") {
           // known page
           let generator = getGenerator(req.url, imageHTML);
-          if (generator) return generator(res);
+          if (generator) return generator(res, configName, config);
 
           // unknown page
           let file = path.join(__dirname, req.url);
@@ -141,19 +149,22 @@ async function runServer(config, subreddits, whenDone) {
           });
         }
       })
-      .listen(8080); //the server object listens on port 8080
+      .listen(0);
+
+    console.log(
+      `Starting review server on http://localhost:${server.address().port}`
+    );
 
     const open = require("open");
-    open("http://localhost:8080");
+    open(`http://localhost:${server.address().port}`);
   });
 }
 
 /**
  * Turn this into something that the catch-up script can call.
  */
-module.exports = async function(config, subreddits) {
-  console.log("Starting review server on http://localhost:8080");
-  await runServer(config, subreddits, config, subreddits, () =>
+module.exports = async function (configName, config, subreddits) {
+  await runServer(configName, config, subreddits, config, subreddits, () =>
     console.log("Interaction complete: shutting down review server.")
   );
 };

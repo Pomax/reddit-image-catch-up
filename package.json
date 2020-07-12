@@ -2,9 +2,9 @@
   "version": "1.1.4",
   "dependencies": {
     "fs-extra": "^8.0.0",
-    "jsdom": "^15.0.0",
+    "jsdom": "^16.0.0",
     "open": "^6.3.0",
-    "rss-parser": "^3.7.0"
+    "rss-parser": "^3.8.0"
   },
   "config": {
     "subreddits": {

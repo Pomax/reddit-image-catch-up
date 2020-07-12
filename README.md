@@ -33,7 +33,8 @@ pretty much done. The following flags are supported:
 
 - `-c filename` explicitly load the configuration from a file.
 - `-s` run a review server on http://localhost:8080 after catching up.
-- `--bypass` skip the actual "catch up" part of the script.   
+- `--bypass` skip the actual "catch up" part of the script.
+- `--preserve` perform catch-up but do not update the last-run timestamps
 
 Note that this last option is really only useful in combination with
 the `-s` flag, to skip the downloading and simply fire up the curation
