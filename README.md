@@ -51,7 +51,7 @@ object to work with, which can be in one of three places:
 
 1. `package.json`
 2. `config.json`
-3. a file like `config.json`, but not called that.
+3. any file structured like `config.json`, loaded via the `-c` flag
 
 ### 1. Using package.json for your configuration
 
@@ -70,7 +70,7 @@ predefined config in this project's package.json:
     "subreddits": {
       "birding/new": 0,
       "redpandas/new": 0,
-      "naturporn/new": 0
+      "natureporn/new": 0
     },
     "domains": [
       "imgur.com",
@@ -140,7 +140,7 @@ JSON in that:
     "subreddits": {
       "birding/new": 0,
       "redpandas/new": 0,
-      "naturporn/new": 0
+      "natureporn/new": 0
     },
     "domains": [
       "imgur.com",
