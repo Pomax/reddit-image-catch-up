@@ -32,7 +32,8 @@ There's not much to say; run it with `node catch-up.js` and you're
 pretty much done. The following flags are supported:
 
 - `-c filename` explicitly load the configuration from a file.
-- `-s` run a review server on http://localhost:8080 after catching up.
+- `-s` run a review server on http://localhost:12345 after catching up (port is not fixed)
+- `-p` run a review server on a specific port
 - `--bypass` skip the actual "catch up" part of the script.
 - `--preserve` perform catch-up but do not update the last-run timestamps
 

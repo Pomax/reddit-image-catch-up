@@ -14,14 +14,22 @@ label {
 input[type="checkbox"] {
   display: none;
 }
+.hidden {
+  display: none!important;
+}
 
-img {
+.entry {
   border: 3px solid transparent;
   width: auto;
   height: 300px;
 }
 
-img.zoomed {
+fieldset[data-type="video"] .entry {
+  height: unset;
+  max-height: 400px;
+}
+
+.entry.zoomed {
   width: auto;
   height: auto;
   max-height: calc(100vh - 20px);
@@ -47,7 +55,9 @@ button {
 }
 
 #all,
-#none {
+#none,
+#img-only,
+#video-only {
   display: inline-block;
   border: 1px solid black;
   background: var(--green);

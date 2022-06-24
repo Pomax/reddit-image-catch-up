@@ -20,14 +20,21 @@ function getImageFields(config, subreddits) {
     let files = fs.readdirSync(dir);
 
     let fieldsets = files.map((filename) => {
-      return `
-			<fieldset>
+      const mediaTag = filename.endsWith(`.mp4`) ? `video` : `img`;
+      let src = `${dir}/${filename}`;
+      if (filename.endsWith(`gifv`) || filename.endsWith(`mp4`)) src = `https://i.imgur.com/${filename}`;
+      const medium = `<${mediaTag} class="entry" src="${src}" alt="${filename}" ${
+        mediaTag === `video` ? `controls` : ``
+      }>`;
+      const fieldset = `
+			<fieldset data-type="${mediaTag}">
 				<label>
 					<input type="checkbox" name="img-${fid()}" value="${path.join(dir, filename)}">
-					<img src="${`${dir}/${filename}`}" alt="${filename}">
+					${medium}
 				</label>
 			</fieldset>
 			`;
+      return fieldset;
     });
 
     return `
@@ -85,8 +92,8 @@ function getGenerator(url, imageHTML) {
         res.setHeader("Content-Type", "text/html");
         data = data
           .toString("utf-8")
-          .replace(`{{ images }}`, imageHTML)
-          .replace(`{{ configName }}`, configName);
+          .replaceAll(`{{ images }}`, imageHTML)
+          .replaceAll(`{{ configName }}`, configName);
         res.end(data);
       });
     },
@@ -113,7 +120,7 @@ function getGenerator(url, imageHTML) {
  * Run a super simple server that shows all downloaded
  * images and lets you pick which ones to keep.
  */
-async function runServer(configName, config, subreddits, whenDone) {
+async function runServer(configName, config, subreddits, port, whenDone) {
   const imageHTML = getImageFields(config, subreddits);
 
   return new Promise(async (resolve) => {
@@ -149,7 +156,7 @@ async function runServer(configName, config, subreddits, whenDone) {
           });
         }
       })
-      .listen(0);
+      .listen(port);
 
     console.log(
       `Starting review server on http://localhost:${server.address().port}`
@@ -163,8 +170,8 @@ async function runServer(configName, config, subreddits, whenDone) {
 /**
  * Turn this into something that the catch-up script can call.
  */
-module.exports = async function (configName, config, subreddits) {
-  await runServer(configName, config, subreddits, config, subreddits, () =>
+module.exports = function (configName, config, subreddits, port) {
+  runServer(configName, config, subreddits, port, () =>
     console.log("Interaction complete: shutting down review server.")
   );
 };

@@ -6,20 +6,75 @@
  * in `package.json` and change it in a way that you can assume will work.
  *
  */
-
-// Some basic imports.
-const http = require("http");
-const https = require("https");
 const path = require("path");
 
 // fs-extra should really just be part of Node.js at this point.
 const fs = require("fs-extra");
+
+// as should the fetch api
+const fetch = require("node-fetch");
+
+const fetchQueue = [];
+
+const queueFetch = (url, filepath) => {
+  if (url.endsWith(`.gifv`)) {
+    url = url.replace(`.gifv`, `.mp4`);
+    filepath = filepath.replace(`.gifv`, `.mp4`);
+  }
+  fetchQueue.push({ url, filepath });
+  processQueue();
+};
+
+const processQueue = () => {
+  if (fetchQueue.length) {
+    const { url, filepath } = fetchQueue.shift();
+    if (url.endsWith(`gifv`)) console.log(url);
+    fetch(url)
+      .then((res) => {
+        const dest = fs.createWriteStream(filepath);
+        res.body.pipe(dest);
+        res.body.on("finish", () => {
+          let size = 0;
+          try {
+            size = fs.statSync(filepath);
+          } catch (e) {
+            // filewrite didn't properly succeed...
+          }
+          if (size === 0) {
+            queueFetch(url, filepath);
+          }
+        });
+      })
+      .catch((e) => {
+        if (e.code === `ETIMEDOUT`) {
+          queueFetch(url, filepath);
+        } else {
+          console.trace();
+          console.error(e);
+        }
+      });
+    setTimeout(processQueue, 50);
+  }
+};
+
+const queueEmpty = () => {
+  console.log(`Waiting for all filewrites to complete...`);
+  return new Promise((resolve) => {
+    const poll = setInterval(() => {
+      if (!fetchQueue.length) {
+        clearInterval(poll);
+        resolve();
+      }
+    }, 500);
+  });
+};
 
 // Note that I will happily take any MR/PR that obviates the need for
 // the following two imports, but I am absolutely not writing my own
 // HTML and RSS parsers, because I've done enough of that and it's
 // always a chore to get right because there are so many edge cases.
 const { JSDOM } = require("jsdom");
+
 const Parser = require("rss-parser");
 const parser = new Parser();
 
@@ -89,22 +144,16 @@ function getFileName(url) {
  * and someone crossposted an image), and (b) the file extension
  * is not one of the excluded-for-download extensions.
  */
-function downloadImage(url, dir) {
+async function downloadImage(url, dir) {
   // Don't download files we already have, or files
-  // without an extention, or "bad" extension.
+  // without an extension, or "bad" extension.
   const filename = getFileName(url).replace(/\?.*/, ``);
   const ext = path.extname(filename);
   if (!ext || config.exclude.indexOf(ext) > -1) return false;
   const filepath = path.join(dir, filename);
   if (fs.existsSync(filepath)) return false;
 
-  // otherwise, pick the correct protocol and download the image.
-  let protocol = https;
-  if (url.indexOf("https://") === -1) protocol = http;
-  const imageFile = fs.createWriteStream(filepath);
-  protocol.get(url, (response) => {
-    response.pipe(imageFile);
-  });
+  await queueFetch(url, filepath);
 
   // Note that we do not verify that the file-write succeeded.
   // As such, it is entirely possible that some images get
@@ -157,25 +206,41 @@ async function catchUp(whenDone, subreddit, since, lastId) {
 
   let downloads = 0;
   let dir = config.consolidate ? config.downloadPath : subreddit.filepath;
-  feed.items.forEach((item) => {
-    // Skip any item that was covered by previous catch-up runs.
-    let date = new Date(item.isoDate);
-    let time = date.getTime();
-    if (time < since) return;
+  let excludeRegex = config.excludeTitle
+    ? new RegExp(config.excludeTitle)
+    : false;
 
-    // Check the content for image links.
-    let content = new JSDOM(item.content);
-    let links = Array.from(content.window.document.querySelectorAll("a"));
-    let imgLinks = links.filter((a) => imageDomain(a.href));
+  await Promise.all(
+    feed.items.map(async (item) => {
+      // Skip any item that was covered by previous catch-up runs.
+      let date = new Date(item.isoDate);
+      let time = date.getTime();
+      if (time < since) return;
 
-    // Note that comment-only posts are obviously a thing, so we skip over them.
-    if (!imgLinks.length) return;
 
-    // If we get here, we should be able to download the image(s) for this post.
-    imgLinks.forEach((img) => {
-      if (downloadImage(img.href, dir)) downloads++;
-    });
-  });
+      // Check the title for an exclusion pattern
+      let title = item.title;
+      if (excludeRegex && title.match(excludeRegex)) {
+        return console.log(`skipping ${title}`);
+      }
+
+      // Check the content for image links.
+      let content = new JSDOM(item.content);
+      let links = Array.from(content.window.document.querySelectorAll("a"));
+      let imgLinks = links.filter((a) => imageDomain(a.href));
+
+      // Note that comment-only posts are obviously a thing, so we skip over them.
+      if (!imgLinks.length) return;
+
+      // If we get here, we should be able to download the image(s) for this post.
+      await Promise.all(
+        imgLinks.map(async (img) => {
+          // console.log(`${title} => ${img.href}`);
+          if (downloadImage(img.href, dir)) downloads++;
+        })
+      );
+    })
+  );
 
   console.log(`${downloads} images were downloaded to ${dir}`);
 
@@ -255,7 +320,13 @@ function writeConfig() {
   // very simple server running on http://localhost:8080
   if (process.argv.indexOf("-s") !== -1) {
     const runServer = require("./server.js");
-    await runServer(configName, config, subreddits);
+    let port = 0;
+    let pid = process.argv.indexOf("-p");
+    if (pid !== -1) {
+      port = parseInt(process.argv[pid + 1]);
+    }
+    await queueEmpty();
+    runServer(configName, config, subreddits, port);
   }
 
   // This may not exit immediately, because of
