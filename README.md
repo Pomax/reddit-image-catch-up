@@ -167,7 +167,7 @@ want, really. You'll just need to tell the script
 to run using that custom config, using a `-c` flag:
 
 ```
-node catch-up.js -c yourfilenamehere
+node catch-up.js -c yourfilenamehere -s
 ```
 
 This can be useful if you want multiple thematic
