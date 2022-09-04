@@ -7,47 +7,33 @@
  *
  */
 const path = require("path");
+const URL = require("url");
+const fs = require("fs");
 
-// fs-extra should really just be part of Node.js at this point.
-const fs = require("fs-extra");
-
-// as should the fetch api
-const fetch = require("node-fetch");
-
+const fetch = require("./download.js");
 const fetchQueue = [];
 
-const queueFetch = (url, filepath) => {
+const queueFetch = (url, filepath, title) => {
   if (url.endsWith(`.gifv`)) {
     url = url.replace(`.gifv`, `.mp4`);
     filepath = filepath.replace(`.gifv`, `.mp4`);
   }
   fetchQueue.push({ url, filepath });
+  metadata.save(title, filepath, url);
   processQueue();
 };
 
 const processQueue = () => {
   if (fetchQueue.length) {
-    const { url, filepath } = fetchQueue.shift();
+    const { url, filepath, title } = fetchQueue.shift();
     if (url.endsWith(`gifv`)) console.log(url);
+
     fetch(url)
-      .then((res) => {
-        const dest = fs.createWriteStream(filepath);
-        res.body.pipe(dest);
-        res.body.on("finish", () => {
-          let size = 0;
-          try {
-            size = fs.statSync(filepath);
-          } catch (e) {
-            // filewrite didn't properly succeed...
-          }
-          if (size === 0) {
-            queueFetch(url, filepath);
-          }
-        });
-      })
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => fs.writeFileSync(filepath, buffer))
       .catch((e) => {
         if (e.code === `ETIMEDOUT`) {
-          queueFetch(url, filepath);
+          queueFetch(url, filepath, title);
         } else {
           console.trace();
           console.error(e);
@@ -73,7 +59,8 @@ const queueEmpty = () => {
 // the following two imports, but I am absolutely not writing my own
 // HTML and RSS parsers, because I've done enough of that and it's
 // always a chore to get right because there are so many edge cases.
-const { JSDOM } = require("jsdom");
+const DomParsingLib = require("dom-parser");
+const DOMParser = new DomParsingLib();
 
 const Parser = require("rss-parser");
 const parser = new Parser();
@@ -96,13 +83,16 @@ let configName = path
   .trim();
 if (configName === "") configName = "default";
 
+const DataFile = require("./data-file-json.js");
+const metadata = new DataFile(configName);
+
 // Make sure that unspecified values are set to sensible defaults:
 config.downloadPath = config.downloadPath || "downloads";
 config.exclude = config.exclude || [];
 config.domains = config.domains || ["imgur.com", "i.redd.it"];
 
 // Also make sure the main download directory exist:
-fs.mkdirpSync(path.join(__dirname, config.downloadPath));
+fs.mkdirSync(path.join(__dirname, config.downloadPath), { recursive: true });
 
 // parse the desired subreddits for catching up on
 const subreddits = [];
@@ -144,7 +134,7 @@ function getFileName(url) {
  * and someone crossposted an image), and (b) the file extension
  * is not one of the excluded-for-download extensions.
  */
-async function downloadImage(url, dir) {
+async function downloadImage(url, dir, title) {
   // Don't download files we already have, or files
   // without an extension, or "bad" extension.
   const filename = getFileName(url).replace(/\?.*/, ``);
@@ -153,7 +143,7 @@ async function downloadImage(url, dir) {
   const filepath = path.join(dir, filename);
   if (fs.existsSync(filepath)) return false;
 
-  await queueFetch(url, filepath);
+  await queueFetch(url, filepath, title);
 
   // Note that we do not verify that the file-write succeeded.
   // As such, it is entirely possible that some images get
@@ -217,26 +207,29 @@ async function catchUp(whenDone, subreddit, since, lastId) {
       let time = date.getTime();
       if (time < since) return;
 
-
-      // Check the title for an exclusion pattern
-      let title = item.title;
-      if (excludeRegex && title.match(excludeRegex)) {
-        return console.log(`skipping ${title}`);
-      }
-
       // Check the content for image links.
-      let content = new JSDOM(item.content);
-      let links = Array.from(content.window.document.querySelectorAll("a"));
-      let imgLinks = links.filter((a) => imageDomain(a.href));
+      const content = DOMParser.parseFromString(item.content);
+      const links = [...content.getElementsByTagName("a")].map((l) => ({
+        href: l.getAttribute(`href`),
+      }));
+      imgLinks = links.filter((a) => imageDomain(a.href));
 
       // Note that comment-only posts are obviously a thing, so we skip over them.
       if (!imgLinks.length) return;
 
+      // Check the title for an exclusion pattern
+      let title = item.title;
+      if (excludeRegex && title.match(excludeRegex)) {
+        const links = imgLinks.map((img) =>
+          path.basename(URL.parse(img.href).pathname)
+        );
+        return console.log(`skipping ${title} - ${links.join(",")}`);
+      }
+
       // If we get here, we should be able to download the image(s) for this post.
       await Promise.all(
         imgLinks.map(async (img) => {
-          // console.log(`${title} => ${img.href}`);
-          if (downloadImage(img.href, dir)) downloads++;
+          if (downloadImage(img.href, dir, title)) downloads++;
         })
       );
     })
@@ -292,6 +285,8 @@ function writeConfig() {
  * Note that this function is invoked immediately upon declaration.
  */
 (async function startCatchingUp() {
+  await metadata.ready();
+
   if (process.argv.indexOf("--bypass") === -1) {
     await Promise.all(
       subreddits.map((subreddit) => {
@@ -308,6 +303,8 @@ function writeConfig() {
         });
       })
     );
+
+    await metadata.flush();
 
     console.log("\nYou're all caught up!");
     console.log(
@@ -326,7 +323,7 @@ function writeConfig() {
       port = parseInt(process.argv[pid + 1]);
     }
     await queueEmpty();
-    runServer(configName, config, subreddits, port);
+    runServer(configName, config, subreddits, metadata, port);
   }
 
   // This may not exit immediately, because of

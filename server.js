@@ -8,12 +8,12 @@
 
 const http = require("http");
 const path = require("path");
-const fs = require("fs-extra");
+const fs = require("fs");
 
 /**
  * Generate the HTML for image selection
  */
-function getImageFields(config, subreddits) {
+function getImageFields(config, subreddits, imageMetaData) {
   let uuid = 1;
   const fid = () => uuid++;
   const generate = (dir, subreddit) => {
@@ -22,10 +22,18 @@ function getImageFields(config, subreddits) {
     let fieldsets = files.map((filename) => {
       const mediaTag = filename.endsWith(`.mp4`) ? `video` : `img`;
       let src = `${dir}/${filename}`;
-      if (filename.endsWith(`gifv`) || filename.endsWith(`mp4`)) src = `https://i.imgur.com/${filename}`;
-      const medium = `<${mediaTag} class="entry" src="${src}" alt="${filename}" ${
+      const metaData = imageMetaData.find(
+        (v) => path.resolve(v.filepath) === path.resolve(src)
+      ) ?? { title: `` };
+      const title = metaData.title ?? ``;
+
+      if (filename.endsWith(`gifv`) || filename.endsWith(`mp4`))
+        src = `https://i.imgur.com/${filename}`;
+
+      const medium = `<${mediaTag} class="entry" src="${src}" alt="${title}" title="${title}" ${
         mediaTag === `video` ? `controls` : ``
       }>`;
+
       const fieldset = `
 			<fieldset data-type="${mediaTag}">
 				<label>
@@ -120,8 +128,16 @@ function getGenerator(url, imageHTML) {
  * Run a super simple server that shows all downloaded
  * images and lets you pick which ones to keep.
  */
-async function runServer(configName, config, subreddits, port, whenDone) {
-  const imageHTML = getImageFields(config, subreddits);
+async function runServer(
+  configName,
+  config,
+  subreddits,
+  metadata,
+  port,
+  whenDone
+) {
+  const imageMetaData = await metadata.getAll();
+  const imageHTML = getImageFields(config, subreddits, imageMetaData);
 
   return new Promise(async (resolve) => {
     const server = http
@@ -141,13 +157,14 @@ async function runServer(configName, config, subreddits, port, whenDone) {
 
         if (req.method === "POST") {
           console.log(`Finalising received review...`);
-          handlePOSTdata(req, () => {
+          handlePOSTdata(req, async () => {
             res.setHeader("Content-Type", "text/html");
             res.write(
               `<!doctype html><html><head><meta charset="utf-8"><title>review received</title></head><body><p>Review received, you can safely close this tab</p></body></html>`
             );
             res.end();
 
+            await metadata.delete();
             server.close(whenDone);
             process.nextTick(() => {
               server.emit("close");
@@ -159,7 +176,7 @@ async function runServer(configName, config, subreddits, port, whenDone) {
       .listen(port);
 
     console.log(
-      `Starting review server on http://localhost:${server.address().port}`
+      `Starting review server for ${configName} on http://localhost:${server.address().port}`
     );
 
     const open = require("open");
@@ -170,8 +187,8 @@ async function runServer(configName, config, subreddits, port, whenDone) {
 /**
  * Turn this into something that the catch-up script can call.
  */
-module.exports = function (configName, config, subreddits, port) {
-  runServer(configName, config, subreddits, port, () =>
-    console.log("Interaction complete: shutting down review server.")
+module.exports = function (configName, config, subreddits, metadata, port) {
+  runServer(configName, config, subreddits, metadata, port, () =>
+    console.log(`Interaction complete: shutting down ${configName} review server.`)
   );
 };
